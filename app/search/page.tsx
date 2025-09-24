@@ -1,32 +1,33 @@
-'use client'
-import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
-import { getFilms } from "@/lib/tmdb";
-import { updateCount } from "@/lib/database";
-import { useSearchParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import FilmItem from "@/components/FilmItem";
-import SearchField from "@/components/SearchField";
-import { Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import Header from "@/components/Header";
-import { Film } from "@/types/interfaces";
+'use client';
+import { Suspense } from 'react'; // Import Suspense
+import { useInfiniteQuery, useMutation } from '@tanstack/react-query';
+import { getFilms } from '@/lib/tmdb';
+import { updateCount } from '@/lib/database';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import FilmItem from '@/components/FilmItem';
+import SearchField from '@/components/SearchField';
+import { Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import Header from '@/components/Header';
+import { Film } from '@/types/interfaces';
 
-export default function SearchPage() {
+function SearchContent() {
   const params = useSearchParams();
-  const term = params.get("term") || "";
+  const term = params.get('term') || '';
   const [input, setInput] = useState(term);
   const router = useRouter();
-  
+
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, error } = useInfiniteQuery({
-    queryKey: ["searchFilms", term],
+    queryKey: ['searchFilms', term],
     queryFn: ({ pageParam = 1 }) => getFilms({ query: term, page: pageParam }),
     initialPageParam: 1,
     getNextPageParam: (last) => (last.page < last.total_pages ? last.page + 1 : undefined),
     enabled: !!term,
   });
 
-  const countUpdate = useMutation({ 
-    mutationFn: (film: Film) => updateCount(term, film) 
+  const countUpdate = useMutation({
+    mutationFn: (film: Film) => updateCount(term, film),
   });
 
   useEffect(() => {
@@ -50,46 +51,54 @@ export default function SearchPage() {
         <div className="mb-8">
           <SearchField value={input} onChange={setInput} onSubmit={handleSubmit} />
         </div>
-        
+
         {term && (
           <h2 className="text-2xl font-semibold mb-6 gradient-text">
             Results for &quot;{term}&quot;
           </h2>
         )}
-        
+
         {isLoading && (
           <div className="flex justify-center py-12">
             <Loader2 className="animate-spin size-8 text-primary" />
           </div>
         )}
-        
+
         {error && (
           <p className="text-destructive text-center py-8">
             Error: {(error as Error).message}
           </p>
         )}
-        
+
         <div className="film-grid">
           {films.map((film) => (
             <FilmItem key={film.id} {...film} />
           ))}
         </div>
-        
+
         {hasNextPage && (
           <div className="flex justify-center mt-8">
-            <Button 
-              onClick={() => fetchNextPage()} 
-              disabled={isFetchingNextPage} 
+            <Button
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
               className="gradient-button"
             >
               {isFetchingNextPage ? (
                 <Loader2 className="animate-spin size-4 mr-2" />
               ) : null}
-              {isFetchingNextPage ? "Loading..." : "Load More"}
+              {isFetchingNextPage ? 'Loading...' : 'Load More'}
             </Button>
           </div>
         )}
       </div>
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="animate-spin size-8 text-primary" /></div>}>
+      <SearchContent />
+    </Suspense>
   );
 }
