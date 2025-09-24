@@ -40,7 +40,15 @@ export async function updateCount(term: string, film: Film) {
 
 export async function getFavorites(userEmail: string): Promise<DatabaseFavorite[]> {
   const res = await db.listDocuments(DB_ID, FAV_COLL, [Query.equal("userEmail", userEmail)]);
-  return res.documents as DatabaseFavorite[];
+  return res.documents.map((doc) => ({
+    filmId: doc.filmId,
+    title: doc.title,
+    vote_average: doc.vote_average,
+    release_date: doc.release_date,
+    poster_path: doc.poster_path,
+    userEmail: doc.userEmail,
+    $id: doc.$id,
+  })) as DatabaseFavorite[];
 }
 
 export async function checkIfFavorite(filmId: number, userEmail: string) {
