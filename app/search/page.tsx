@@ -17,7 +17,7 @@ export default function SearchPage() {
   const [input, setInput] = useState(term);
   const router = useRouter();
   
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, error, refetch } = useInfiniteQuery({
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, error } = useInfiniteQuery({
     queryKey: ["searchFilms", term],
     queryFn: ({ pageParam = 1 }) => getFilms({ query: term, page: pageParam }),
     initialPageParam: 1,
@@ -33,7 +33,7 @@ export default function SearchPage() {
     if (data?.pages[0]?.results[0]) {
       countUpdate.mutate(data.pages[0].results[0]);
     }
-  }, [data]);
+  }, [data, countUpdate]);
 
   const handleSubmit = () => {
     if (input.trim()) {
@@ -53,7 +53,7 @@ export default function SearchPage() {
         
         {term && (
           <h2 className="text-2xl font-semibold mb-6 gradient-text">
-            Results for "{term}"
+            Results for &quot;{term}&quot;
           </h2>
         )}
         
@@ -65,7 +65,7 @@ export default function SearchPage() {
         
         {error && (
           <p className="text-destructive text-center py-8">
-            Error: {error.message}
+            Error: {(error as Error).message}
           </p>
         )}
         
