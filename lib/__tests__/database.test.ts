@@ -1,6 +1,5 @@
 import { getFavorites } from '../database';
 
-// Mock Appwrite
 jest.mock('appwrite', () => ({
   Client: jest.fn().mockImplementation(() => ({
     setEndpoint: jest.fn().mockReturnThis(),
@@ -14,15 +13,15 @@ jest.mock('appwrite', () => ({
   },
 }));
 
+import { Databases, Query } from 'appwrite';
+
 describe('Database functions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('gets favorites for user', async () => {
-    const { Databases, Query } = require('appwrite');
-    const mockListDocuments = Databases.mock.results[0].value.listDocuments;
-    
+    const mockListDocuments = (Databases as jest.Mock).mock.results[0].value.listDocuments;
     const mockFavorites = [{ $id: '1', filmId: 1, title: 'Test Movie' }];
     mockListDocuments.mockResolvedValueOnce({ documents: mockFavorites });
 
