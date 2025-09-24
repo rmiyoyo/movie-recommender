@@ -10,6 +10,7 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
+
 export default function MainPage() {
   const { data: session } = useSession();
   const router = useRouter();

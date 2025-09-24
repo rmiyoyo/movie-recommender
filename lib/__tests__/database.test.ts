@@ -1,5 +1,6 @@
-import { getFavorites, checkIfFavorite, addFavorite, removeFavorite } from '../database';
+import { getFavorites } from '../database';
 
+// Mock Appwrite
 jest.mock('appwrite', () => ({
   Client: jest.fn().mockImplementation(() => ({
     setEndpoint: jest.fn().mockReturnThis(),
@@ -7,17 +8,9 @@ jest.mock('appwrite', () => ({
   })),
   Databases: jest.fn().mockImplementation(() => ({
     listDocuments: jest.fn(),
-    createDocument: jest.fn(),
-    updateDocument: jest.fn(),
-    deleteDocument: jest.fn(),
   })),
-  ID: {
-    unique: jest.fn(() => 'unique-id'),
-  },
   Query: {
     equal: jest.fn(),
-    orderDesc: jest.fn(),
-    limit: jest.fn(),
   },
 }));
 

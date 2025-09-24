@@ -1,10 +1,12 @@
-import { getFilms, getFilmInfo, getTrendingFilms } from '../tmdb';
+import { getFilms } from '../tmdb';
 
-global.fetch = jest.fn();
+// Mock global fetch
+const mockFetch = jest.fn();
+global.fetch = mockFetch;
 
 describe('TMDB API', () => {
   beforeEach(() => {
-    (fetch as jest.Mock).mockClear();
+    mockFetch.mockClear();
   });
 
   it('fetches films successfully', async () => {
@@ -15,14 +17,14 @@ describe('TMDB API', () => {
       total_results: 0
     };
 
-    (fetch as jest.Mock).mockResolvedValueOnce({
+    mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => mockResponse,
     });
 
     const result = await getFilms({});
     
-    expect(fetch).toHaveBeenCalledWith(
+    expect(mockFetch).toHaveBeenCalledWith(
       'https://api.themoviedb.org/3/discover/movie?page=1&sort_by=popularity.desc',
       { headers: expect.any(Object) }
     );
@@ -30,7 +32,7 @@ describe('TMDB API', () => {
   });
 
   it('handles fetch error', async () => {
-    (fetch as jest.Mock).mockResolvedValueOnce({
+    mockFetch.mockResolvedValueOnce({
       ok: false,
     });
 
