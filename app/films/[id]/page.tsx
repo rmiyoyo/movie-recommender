@@ -5,10 +5,26 @@ import { getFilmInfo } from "@/lib/tmdb";
 import { addFavorite, removeFavorite, checkIfFavorite } from "@/lib/database";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, Bookmark, ArrowLeft, Star, Clock } from "lucide-react";
 import Image from "next/image";
 import { motion } from "framer-motion";
+
+interface Genre {
+  id: number;
+  name: string;
+}
+
+interface Film {
+  id: number;
+  title: string;
+  backdrop_path: string;
+  poster_path: string;
+  vote_average: number;
+  runtime: number;
+  release_date: string;
+  overview: string;
+  genres: Genre[];
+}
 
 export default function FilmPage() {
   const { id } = useParams();
@@ -26,12 +42,22 @@ export default function FilmPage() {
   
   const { data: favored } = useQuery({
     queryKey: ["fav", filmId, userEmail],
-    queryFn: () => checkIfFavorite(filmId, userEmail!),
+    queryFn: () => {
+      if (!userEmail) throw new Error("No user email");
+      return checkIfFavorite(filmId, userEmail);
+    },
     enabled: !!session && !!userEmail,
   });
 
   const toggleFav = useMutation({
-    mutationFn: () => favored ? removeFavorite(filmId, userEmail!) : addFavorite(film!, userEmail!),
+    mutationFn: () => {
+      if (!userEmail) throw new Error("No user email");
+      if (!film) throw new Error("No film data");
+      
+      return favored 
+        ? removeFavorite(filmId, userEmail) 
+        : addFavorite(film, userEmail);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["fav", filmId, userEmail] });
       queryClient.invalidateQueries({ queryKey: ["favorites", userEmail] });
@@ -40,8 +66,6 @@ export default function FilmPage() {
 
   if (isLoading) return <div className="flex justify-center items-center min-h-screen"><Loader2 className="animate-spin size-12" /></div>;
   if (error || !film) return <div className="flex justify-center items-center min-h-screen"><p className="text-destructive text-xl">Error loading film</p></div>;
-  
-  type Genre = { id: number; name: string };
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">

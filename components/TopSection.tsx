@@ -3,9 +3,17 @@ import { useQuery } from "@tanstack/react-query";
 import { getTrendingFilms } from "@/lib/tmdb";
 import Image from "next/image";
 import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Loader2, Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+
+interface TrendingFilm {
+  id: number;
+  title: string;
+  poster_path: string;
+  vote_average: number;
+  release_date: string;
+}
 
 export default function TopSection() {
   const { data, isLoading, error } = useQuery({
@@ -65,13 +73,15 @@ export default function TopSection() {
   }, [autoScrollEnabled, data]);
 
   useEffect(() => {
-    if (!scrollContainerRef.current) return;
+    const currentRef = scrollContainerRef.current;
+    
+    if (!currentRef) return;
     
     updateScrollState();
-    scrollContainerRef.current.addEventListener('scroll', updateScrollState);
+    currentRef.addEventListener('scroll', updateScrollState);
     
     return () => {
-      scrollContainerRef.current?.removeEventListener('scroll', updateScrollState);
+      currentRef.removeEventListener('scroll', updateScrollState);
     };
   }, [data]);
 
@@ -141,7 +151,7 @@ export default function TopSection() {
         className="top-films-container no-scrollbar"
         style={{ overflow: 'hidden' }}
       >
-        {data?.map((item: any, idx: number) => (
+        {data?.map((item: TrendingFilm) => (
           <Card 
             key={item.id} 
             className="trending-card group flex-shrink-0"

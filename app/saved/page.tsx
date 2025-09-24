@@ -7,13 +7,31 @@ import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 
+interface Favorite {
+  filmId: number;
+  title: string;
+  poster_path: string;
+  vote_average: number;
+  release_date: string;
+}
+
 export default function FavoritesPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   
-  const { data: favorites, isLoading, error } = useQuery({
+  const { data: favorites, isLoading, error } = useQuery<Favorite[]>({
     queryKey: ["favorites", session?.user?.email],
-    queryFn: () => getFavorites(session?.user?.email!),
+    queryFn: async () => {
+      if (!session?.user?.email) throw new Error("No user email");
+      const data = await getFavorites(session.user.email);
+      return data.map((doc: any) => ({
+        filmId: doc.filmId,
+        title: doc.title,
+        poster_path: doc.poster_path ?? doc.posterUrl,
+        vote_average: doc.vote_average,
+        release_date: doc.release_date,
+      }));
+    },
     enabled: !!session?.user?.email,
   });
 
@@ -32,7 +50,7 @@ export default function FavoritesPage() {
         {isLoading && <div className="flex justify-center py-12"><Loader2 className="animate-spin size-8" /></div>}
         {error && <p className="text-destructive text-center py-8">Error loading favorites</p>}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-          {favorites?.map((fav: any) => (
+          {favorites?.map((fav: Favorite) => (
             <FilmItem 
               key={fav.filmId} 
               id={fav.filmId} 
