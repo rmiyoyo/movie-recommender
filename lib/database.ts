@@ -1,5 +1,6 @@
 import { Client, Databases, ID, Query } from "appwrite";
 import { Film, FilmInfo, TopFilm } from "@/types/interfaces";
+import { DatabaseFavorite } from "@/types/favorite";
 
 const client = new Client()
   .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
@@ -37,9 +38,9 @@ export async function updateCount(term: string, film: Film) {
   }
 }
 
-export async function getFavorites(userEmail: string) {
+export async function getFavorites(userEmail: string): Promise<DatabaseFavorite[]> {
   const res = await db.listDocuments(DB_ID, FAV_COLL, [Query.equal("userEmail", userEmail)]);
-  return res.documents;
+  return res.documents as DatabaseFavorite[];
 }
 
 export async function checkIfFavorite(filmId: number, userEmail: string) {
