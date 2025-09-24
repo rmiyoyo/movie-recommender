@@ -6,23 +6,7 @@ import FilmItem from "@/components/FilmItem";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
-
-interface Favorite {
-  filmId: number;
-  title: string;
-  poster_path: string;
-  vote_average: number;
-  release_date: string;
-}
-
-interface DatabaseFavorite {
-  filmId: number;
-  title: string;
-  poster_path?: string;
-  posterUrl?: string;
-  vote_average: number;
-  release_date: string;
-}
+import { Favorite, DatabaseFavorite } from "@/types/favorite";
 
 export default function FavoritesPage() {
   const { data: session, status } = useSession();
@@ -33,7 +17,7 @@ export default function FavoritesPage() {
     queryFn: async () => {
       if (!session?.user?.email) throw new Error("No user email");
       const data = await getFavorites(session.user.email);
-      return data.map((doc: any) => ({
+      return data.map((doc: DatabaseFavorite) => ({
         filmId: doc.filmId,
         title: doc.title,
         poster_path: doc.poster_path ?? doc.posterUrl ?? "",
