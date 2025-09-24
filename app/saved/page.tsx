@@ -33,7 +33,7 @@ export default function FavoritesPage() {
     queryFn: async () => {
       if (!session?.user?.email) throw new Error("No user email");
       const data = await getFavorites(session.user.email);
-      return data.map((doc: DatabaseFavorite) => ({
+      return data.map((doc: any) => ({
         filmId: doc.filmId,
         title: doc.title,
         poster_path: doc.poster_path ?? doc.posterUrl ?? "",
