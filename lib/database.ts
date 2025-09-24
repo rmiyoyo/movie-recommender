@@ -37,28 +37,28 @@ export async function updateCount(term: string, film: Film) {
   }
 }
 
-export async function getFavorites(userId: string) {
-  const res = await db.listDocuments(DB_ID, FAV_COLL, [Query.equal("userId", userId)]);
+export async function getFavorites(userEmail: string) {
+  const res = await db.listDocuments(DB_ID, FAV_COLL, [Query.equal("userEmail", userEmail)]);
   return res.documents;
 }
 
-export async function checkIfFavorite(filmId: number, userId: string) {
-  const res = await db.listDocuments(DB_ID, FAV_COLL, [Query.equal("userId", userId), Query.equal("filmId", filmId)]);
+export async function checkIfFavorite(filmId: number, userEmail: string) {
+  const res = await db.listDocuments(DB_ID, FAV_COLL, [Query.equal("userEmail", userEmail), Query.equal("filmId", filmId)]);
   return res.documents.length > 0;
 }
 
-export async function addFavorite(film: FilmInfo, userId: string) {
+export async function addFavorite(film: FilmInfo, userEmail: string) {
   await db.createDocument(DB_ID, FAV_COLL, ID.unique(), {
     filmId: film.id,
     title: film.title,
     poster_path: film.poster_path,
     vote_average: film.vote_average,
     release_date: film.release_date,
-    userId,
+    userEmail,
   });
 }
 
-export async function removeFavorite(filmId: number, userId: string) {
-  const res = await db.listDocuments(DB_ID, FAV_COLL, [Query.equal("userId", userId), Query.equal("filmId", filmId)]);
+export async function removeFavorite(filmId: number, userEmail: string) {
+  const res = await db.listDocuments(DB_ID, FAV_COLL, [Query.equal("userEmail", userEmail), Query.equal("filmId", filmId)]);
   if (res.documents.length > 0) await db.deleteDocument(DB_ID, FAV_COLL, res.documents[0].$id);
 }

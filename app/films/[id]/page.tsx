@@ -9,32 +9,40 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, Bookmark, ArrowLeft, Star, Clock } from "lucide-react";
 import Image from "next/image";
 import { motion } from "framer-motion";
+
 export default function FilmPage() {
   const { id } = useParams();
   const filmId = parseInt(id as string);
   const { data: session } = useSession();
   const queryClient = useQueryClient();
   const router = useRouter();
+  
   const { data: film, isLoading, error } = useQuery({
     queryKey: ["filmInfo", filmId],
     queryFn: () => getFilmInfo(filmId),
   });
-  const userId = (session?.user as { id?: string })?.id;
+
+  const userEmail = session?.user?.email;
+  
   const { data: favored } = useQuery({
-    queryKey: ["fav", filmId],
-    queryFn: () => checkIfFavorite(filmId, userId!),
-    enabled: !!session && !!userId,
+    queryKey: ["fav", filmId, userEmail],
+    queryFn: () => checkIfFavorite(filmId, userEmail!),
+    enabled: !!session && !!userEmail,
   });
+
   const toggleFav = useMutation({
-    mutationFn: () => favored ? removeFavorite(filmId, userId!) : addFavorite(film!, userId!),
+    mutationFn: () => favored ? removeFavorite(filmId, userEmail!) : addFavorite(film!, userEmail!),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["fav", filmId] });
-      queryClient.invalidateQueries({ queryKey: ["favorites"] });
+      queryClient.invalidateQueries({ queryKey: ["fav", filmId, userEmail] });
+      queryClient.invalidateQueries({ queryKey: ["favorites", userEmail] });
     },
   });
+
   if (isLoading) return <div className="flex justify-center items-center min-h-screen"><Loader2 className="animate-spin size-12" /></div>;
   if (error || !film) return <div className="flex justify-center items-center min-h-screen"><p className="text-destructive text-xl">Error loading film</p></div>;
+  
   type Genre = { id: number; name: string };
+  
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
@@ -91,9 +99,9 @@ export default function FilmPage() {
             </div>
             
             {session && (
-              <Button onClick={() => toggleFav.mutate()} size="lg" className="gap-2">
+              <Button onClick={() => toggleFav.mutate()} size="lg" className="gap-2" disabled={toggleFav.isPending}>
                 <Bookmark className={`size-5 ${favored ? "fill-current" : ""}`} />
-                {favored ? "Remove from Favorites" : "Add to Favorites"}
+                {toggleFav.isPending ? "Saving..." : favored ? "Remove from Favorites" : "Add to Favorites"}
               </Button>
             )}
           </div>
