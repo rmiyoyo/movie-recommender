@@ -15,6 +15,15 @@ interface Favorite {
   release_date: string;
 }
 
+interface DatabaseFavorite {
+  filmId: number;
+  title: string;
+  poster_path?: string;
+  posterUrl?: string;
+  vote_average: number;
+  release_date: string;
+}
+
 export default function FavoritesPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -24,10 +33,10 @@ export default function FavoritesPage() {
     queryFn: async () => {
       if (!session?.user?.email) throw new Error("No user email");
       const data = await getFavorites(session.user.email);
-      return data.map((doc: any) => ({
+      return data.map((doc: DatabaseFavorite) => ({
         filmId: doc.filmId,
         title: doc.title,
-        poster_path: doc.poster_path ?? doc.posterUrl,
+        poster_path: doc.poster_path ?? doc.posterUrl ?? "",
         vote_average: doc.vote_average,
         release_date: doc.release_date,
       }));

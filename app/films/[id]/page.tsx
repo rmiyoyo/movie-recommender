@@ -33,7 +33,7 @@ export default function FilmPage() {
   const queryClient = useQueryClient();
   const router = useRouter();
   
-  const { data: film, isLoading, error } = useQuery({
+  const { data: film, isLoading, error } = useQuery<Film>({
     queryKey: ["filmInfo", filmId],
     queryFn: () => getFilmInfo(filmId),
   });

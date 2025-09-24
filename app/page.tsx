@@ -1,5 +1,4 @@
 'use client'
-import { useSession } from "next-auth/react";
 import FilmItem from "@/components/FilmItem";
 import SearchField from "@/components/SearchField";
 import TopSection from "@/components/TopSection";
@@ -12,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 
 export default function MainPage() {
-  const { data: session } = useSession();
   const router = useRouter();
   const [term, setTerm] = useState("");
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, error } = useInfiniteQuery({
